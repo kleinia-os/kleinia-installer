@@ -20,14 +20,12 @@ pushd data
 for f in *.webp; do
     install -Dm644 {,$root/$BENTO/}$f
 done
-ln -s viewports-light.webp $root/$BENTO/1
-ln -s viewports-dark.webp $root/$BENTO/1-dark
-ln -s umbrella-light.webp $root/$BENTO/2
-ln -s umbrella-dark.webp $root/$BENTO/2-dark
-ln -s blueprint.webp $root/$BENTO/3
-ln -s blueprint.webp $root/$BENTO/3-dark
-ln -s foresty-skies-light.webp $root/$BENTO/4
-ln -s foresty-skies-dark.webp $root/$BENTO/4-dark
+ln -s kleinia-welcome-light.webp $root/$BENTO/1
+ln -s kleinia-welcome-dark.webp $root/$BENTO/1-dark
+ln -s kleinia-docs-light.webp $root/$BENTO/2
+ln -s kleinia-docs-dark.webp $root/$BENTO/2-dark
+ln -s kleinia-community-light.webp $root/$BENTO/3
+ln -s kleinia-community-dark.webp $root/$BENTO/3-dark
 popd
 
 pushd templates

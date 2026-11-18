@@ -1,4 +1,19 @@
-# Readymade
+# Readymade — Kleinia packaging fork
+
+This is the KleiniaOS packaging fork of [FyraLabs Readymade](https://github.com/FyraLabs/readymade)
+(upstream history preserved; Kleinia commits on top). It produces the
+`kleinia-installer` RPM — the GUI installer of the Kleinia live ISO —
+published as an OCI artifact image and consumed by the
+[kleinia](https://github.com/kleinia-os/kleinia) assembly repo via its
+artifacts manifest.
+
+Build/publish: `just build / test / package / artifact / push` (see
+`Justfile`, `dist/Containerfile`, `scripts/push.sh`). Clone with
+`--recurse-submodules`. Kleinia-specific notes: `distro/kleinia/`.
+
+Upstream README follows.
+
+---
 
 Install ready-made distribution images!
 

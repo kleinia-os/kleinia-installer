@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# kleinia-installer RPM: the installer binary + the bundled libhelium
+# runtime. Distro-facing config (readymade.toml, repart-cfgs, desktop
+# entries) lives in the kleinia assembly repo's files tree — single source
+# of truth for distro config.
+name: kleinia-installer
+arch: x86_64
+platform: linux
+version: "{{PKG_VERSION}}"
+release: 1
+section: admin
+priority: optional
+maintainer: KleiniaOS <dev@kleinia.io>
+description: |
+  ReadyMade GUI installer for Kleinia (FyraLabs readymade with Kleinia
+  pipeline fixes). Installs the bootc image embedded in the live ISO to
+  disk. Bundles libhelium-1 (not available in Fedora repos).
+vendor: KleiniaOS
+homepage: https://github.com/kleinia-os/kleinia-installer
+license: GPL-3.0-or-later
+contents:
+  - src: build-out/readymade
+    dst: /usr/bin/readymade
+    file_info:
+      mode: 0755
+  - src: build-out/libhelium-1.so.1
+    dst: /usr/lib64/libhelium-1.so.1
+    file_info:
+      mode: 0755
+  - src: data/com.fyralabs.pkexec.readymade.policy
+    dst: /usr/share/polkit-1/actions/com.fyralabs.pkexec.readymade.policy

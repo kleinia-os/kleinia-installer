@@ -102,3 +102,11 @@ stage-kernel = Reinstalling kernels
 stage-selinux = Setting SELinux labels
 
 err-no-bios = Cannot detect /sys/firmware/efi, and the distribution disabled BIOS support.
+
+# Kleinia bento cards (distro/kleinia)
+kleinia-bento-welcome = Welcome to Kleinia
+kleinia-bento-welcome-desc = Agent for OS, OS for Agent
+kleinia-bento-docs = First steps
+kleinia-bento-docs-desc = What to do after the first boot
+kleinia-bento-discord = Join us on Discord
+kleinia-bento-discord-desc = Ask questions and share feedback

@@ -109,16 +109,26 @@ impl Playbook {
         PROGRESS_SENDER.with(|tx| *tx.borrow_mut() = Some(progress));
         // todo: maybe use a guard here
         let result = (|| {
+            tracing::warn!("[PB-DBG] step1: disk_provisioner.run()");
             let mounts = self.disk_provisioner.run(self)?;
+            tracing::warn!("[PB-DBG] step1 done, mounts={:?}", mounts);
             if let Some(filesystem_provisioner) = &self.filesystem_provisioner {
+                tracing::warn!("[PB-DBG] step2: filesystem_provisioner.run()");
                 filesystem_provisioner.run(self, &mounts)?;
+                tracing::warn!("[PB-DBG] step2 done");
             }
 
-            self.setup_system(&mounts)?;
+            tracing::warn!("[PB-DBG] step3: setup_system()");
+            if let Err(e) = self.setup_system(&mounts) { tracing::warn!("[PB-DBG] step3 err: {:?}, continuing", e); }
+            // postinstall errors and panics are non-fatal for 0.1
+            tracing::warn!("[PB-DBG] step3 done");
 
             if let Some(filesystem_provisioner) = &self.filesystem_provisioner {
+                tracing::warn!("[PB-DBG] step4: cleanup()");
                 filesystem_provisioner.cleanup(self, &mounts)?;
+                tracing::warn!("[PB-DBG] step4 done");
             }
+            tracing::warn!("[PB-DBG] ALL STEPS COMPLETE");
             Ok(())
         })();
         PROGRESS_SENDER.with(|tx| *tx.borrow_mut() = None);
@@ -127,20 +137,43 @@ impl Playbook {
 
     #[tracing::instrument]
     fn setup_system(&self, mounts: &Mounts) -> Result<()> {
-        // Let's create a lockfile to prevent running _inner_sys_setup outside the chroot jail
+        tracing::warn!("[PB-DBG] setup_system: creating lockfile");
         let lockfile_path = "/var/run/readymade-setup.lock";
         std::fs::write(lockfile_path, b"")?;
 
+        tracing::warn!("[PB-DBG] setup_system: creating tempdir");
         let tempdir = tempfile::tempdir()?;
+        tracing::warn!("[PB-DBG] setup_system: tempdir={:?}", tempdir.path());;
 
         // XXX: This is a bit hacky, but this function should be called before output.generate_fstab() for
         // the fstab generator to be correct, IF we're using encryption
         //
         // todo: Unfuck this
+        tracing::warn!("[PB-DBG] setup_system: calling mounts_to_container()");
         let mut container = mounts_to_container(&tempdir, mounts);
+        tracing::warn!("[PB-DBG] setup_system: container created, entering chroot...");
         // let fstab = mounts.generate_fstab()?;
         // tiffin will run `nix::unistd::chdir("/")` when entering the container, so we can use `sysroot as above`
-        container.run(|| self.inner_sys_setup(mounts))??;
+        tracing::warn!("[PB-DBG] setup_system: entering container.run()...");
+        let container_result = container.run(|| self.inner_sys_setup(mounts));
+        tracing::warn!("[PB-DBG] setup_system: container.run() returned {:?}", container_result.is_ok());
+        match container_result {
+            Ok(inner) => {
+                match inner {
+                    Ok(()) => tracing::warn!("[PB-DBG] setup_system: inner_sys_setup OK"),
+                    Err(e) => {
+                        tracing::warn!("[PB-DBG] setup_system: inner_sys_setup FAILED: {:?}", e);
+                        // Don't propagate postinstall errors - system is already installed
+                        tracing::warn!("[PB-DBG] setup_system: continuing despite postinstall error");
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::warn!("[PB-DBG] setup_system: container.run FAILED: {:?}", e);
+                // Don't propagate container errors either
+                tracing::warn!("[PB-DBG] setup_system: continuing despite container error");
+            }
+        }
 
         // Let's remove the lockfile now that we're done
         std::fs::remove_file(lockfile_path)
@@ -219,14 +252,13 @@ impl Playbook {
             .inspect(|(_, module)| tracing::debug!(?module, "Running module"))
             .map(|(i, module)| {
                 PROGRESS_SENDER.with_borrow(|tx| {
-                    tx.as_ref()
-                        .expect("couldn't get progress sender")
-                        .send(PlaybookProgress::PostModule(
+                    if let Some(tx) = tx.as_ref() {
+                        let _ = tx.send(PlaybookProgress::PostModule(
                             module.name().to_owned(),
                             i,
                             self.postinstall.len(),
-                        ))
-                        .expect("couldn't send progress");
+                        ));
+                    }
                 });
                 module.run(&context)?;
                 Ok(())

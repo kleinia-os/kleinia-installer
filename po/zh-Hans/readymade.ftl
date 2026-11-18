@@ -21,3 +21,11 @@ page-installation-progress = 安装基本系统中...
 page-installationtype = 安装类型
 page-installationtype-chromebook = Chromebook
 
+
+# Kleinia bento cards (distro/kleinia)
+kleinia-bento-welcome = 欢迎使用 Kleinia
+kleinia-bento-welcome-desc = Agent for OS, OS for Agent
+kleinia-bento-docs = 第一步
+kleinia-bento-docs-desc = 首次启动后可以做什么
+kleinia-bento-discord = 加入 Discord 社区
+kleinia-bento-discord-desc = 提问、反馈，和大家交流

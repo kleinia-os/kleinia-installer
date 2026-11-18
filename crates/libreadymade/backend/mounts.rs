@@ -80,16 +80,33 @@ impl Mount {
             &self.partition
         };
 
-        sys_mount::Mount::builder()
-            .data(&self.options)
-            .mount(source, &target)
-            .with_context(|| {
-                format!(
-                    "cannot mount from {:?} to {:?}",
-                    source.display(),
-                    target.display()
-                )
-            })?;
+        // Use mount(8) instead of sys_mount for better filesystem auto-detection
+        let target_str = target.to_str().unwrap_or_default();
+        let source_str = source.to_str().unwrap_or_default();
+        let mount_output = if self.options.is_empty() {
+            std::process::Command::new("mount")
+                .arg(source_str)
+                .arg(target_str)
+                .output()
+        } else {
+            std::process::Command::new("mount")
+                .arg("-o")
+                .arg(&self.options)
+                .arg(source_str)
+                .arg(target_str)
+                .output()
+        };
+        match mount_output {
+            Ok(o) if o.status.success() => {}
+            Ok(o) => {
+                let stderr = String::from_utf8_lossy(&o.stderr);
+                return Err(eyre!(
+                    "mount {:?} -> {:?} failed: {} (options: {:?})",
+                    source_str, target_str, stderr, self.options
+                ));
+            }
+            Err(e) => return Err(eyre!("failed to spawn mount: {}", e)),
+        }
 
         Ok(())
     }
@@ -349,12 +366,21 @@ pub struct CryptData {
 /// Panics if `cryptsetup` cannot be run.
 #[must_use]
 pub fn is_luks(node: &Path) -> bool {
-    Command::new("cryptsetup")
+    match Command::new("cryptsetup")
         .arg("isLuks")
         .arg(node)
         .status()
-        .expect("cannot run cryptsetup")
-        .success()
+    {
+        Ok(status) => status.success(),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            tracing::warn!("cryptsetup not found, assuming partition is not LUKS");
+            false
+        }
+        Err(e) => {
+            tracing::warn!("cryptsetup failed: {:?}, assuming not LUKS", e);
+            false
+        }
+    }
 }
 fn cryptsetup_luks_uuid(node: &Path) -> Result<String, color_eyre::eyre::Error> {
     let cmd = Command::new("cryptsetup")

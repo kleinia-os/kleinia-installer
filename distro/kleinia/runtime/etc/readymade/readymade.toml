@@ -1,0 +1,31 @@
+[install]
+allowed_installtypes = ["wholedisk"]
+copy_mode = "bootc"
+bootc_imgref = "containers-storage:ghcr.io/kleinia-os/kleinia:testing"
+bootc_target_imgref = "ghcr.io/kleinia-os/kleinia:testing"
+
+[distro]
+name = "Kleinia 0.1 (Aloe)"
+icon = "kleinia-app-icon"
+bios_support = true
+
+[[postinstall]]
+module = "Fstab"
+
+[[bento]]
+title = "kleinia-bento-welcome"
+desc = "kleinia-bento-welcome-desc"
+link = "https://kleinia.io"
+icon = "kleinia-symbolic"
+
+[[bento]]
+title = "kleinia-bento-docs"
+desc = "kleinia-bento-docs-desc"
+link = "https://docs.kleinia.io/start/first-boot/"
+icon = "kleinia-docs-symbolic"
+
+[[bento]]
+title = "kleinia-bento-discord"
+desc = "kleinia-bento-discord-desc"
+link = "https://kleinia.io/discord"
+icon = "kleinia-community-symbolic"

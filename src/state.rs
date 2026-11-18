@@ -206,16 +206,19 @@ where
             std::env::var("READYMADE_LOG").as_deref().unwrap_or("info")
         ))
         .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()?;
 
+    eprintln!("[GUI-DBG] about to write playbook to subprocess stdin...");
     let stdin = child
         .stdin
         .as_mut()
         .ok_or_eyre("Failed to open subprocess stdin")?;
     stdin.write_all(serde_json::to_string(playbook)?.as_bytes())?;
     stdin.flush()?;
+    drop(stdin); // close stdin so child sees EOF
+    eprintln!("[GUI-DBG] playbook JSON written and stdin flushed");
 
     let output = child.wait_with_output()?;
     ipc_thread.join().expect("cannot join ipc thread");

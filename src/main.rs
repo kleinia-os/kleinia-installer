@@ -26,7 +26,6 @@ pub static LL: LazyLock<RwLock<i18n_embed::fluent::FluentLanguageLoader>> =
 
 #[derive(rust_embed::RustEmbed)]
 #[folder = "po/"]
-#[exclude = "en-owo/*.ftl"]
 struct Localizations;
 
 static LOCALE_SOLVER: LazyLock<poly_l10n::LocaleFallbackSolver> = LazyLock::new(Default::default);
@@ -163,8 +162,14 @@ impl SimpleComponent for AppModel {
         let settings = gtk::Settings::for_display(&display);
 
         let theme = gtk::IconTheme::for_display(&display);
-        theme.add_resource_path("/com/FyraLabs/Readymade/icons");
-        settings.set_gtk_icon_theme_name(Some("Hydrogen"));
+        theme.add_resource_path("/com/fyralabs/Readymade/icons");
+        // Hydrogen (tauOS) is not shipped on every distro (Kleinia has none):
+        // only force it when installed, otherwise stay on Adwaita explicitly.
+        let has_hydrogen = theme
+            .search_path()
+            .iter()
+            .any(|dir| dir.join("Hydrogen").join("index.theme").exists());
+        settings.set_gtk_icon_theme_name(Some(if has_hydrogen { "Hydrogen" } else { "Adwaita" }));
 
         let mut model = Self::_default(sender);
 
@@ -227,9 +232,14 @@ impl SimpleComponent for AppModel {
 
 static AVAILABLE_LANGS: LazyLock<Vec<i18n_embed::unic_langid::LanguageIdentifier>> =
     LazyLock::new(|| {
-        i18n_embed::fluent::fluent_language_loader!()
+        let loader = i18n_embed::fluent::fluent_language_loader!();
+        let langs: Vec<_> = loader
             .available_languages(&Localizations)
-            .unwrap()
+            .unwrap();
+        for l in &langs {
+            tracing::warn!("[LANG] {}", l);
+        }
+        langs
     });
 
 fn handle_l10n() -> i18n_embed::fluent::FluentLanguageLoader {
@@ -266,7 +276,10 @@ fn main() -> Result<()> {
 
     if let Some((i, _)) = std::env::args().find_position(|arg| arg == "--non-interactive") {
         tracing::info!("Running in non-interactive mode");
-        let playbook: Playbook = serde_json::from_reader(std::io::stdin())?;
+        tracing::warn!("[NI-DBG] about to read playbook from stdin...");
+        let playbook: Playbook = serde_json::from_reader(std::io::stdin())
+            .inspect_err(|e| tracing::warn!("[NI-DBG] stdin read FAILED: {:?}", e))?;
+        tracing::warn!("[NI-DBG] playbook parsed OK");
         let progress = if let Some(channel_id) = std::env::args().nth(i.wrapping_add(1)) {
             let sender = ipc_channel::ipc::IpcSender::connect(channel_id)?;
             let (tx, rx) = Playbook::channel();

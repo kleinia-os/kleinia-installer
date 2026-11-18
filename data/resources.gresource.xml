@@ -3,14 +3,12 @@
     <gresource prefix="/com/fyralabs/Readymade/">
         <file>style.css</file>
         <file>style-dark.css</file>
-        <file>umbrella-light.webp</file>
-        <file>umbrella-dark.webp</file>
-        <file>viewports-light.webp</file>
-        <file>viewports-dark.webp</file>
-        <file>blueprint.webp</file>
-        <file>blueprint-dark.webp</file>
-        <file>foresty-skies-light.webp</file>
-        <file>foresty-skies-dark.webp</file>
+        <file>kleinia-welcome-light.webp</file>
+        <file>kleinia-welcome-dark.webp</file>
+        <file>kleinia-docs-light.webp</file>
+        <file>kleinia-docs-dark.webp</file>
+        <file>kleinia-community-light.webp</file>
+        <file>kleinia-community-dark.webp</file>
     </gresource>
     <gresource prefix="/com/fyralabs/Readymade/icons/symbolic/actions/">
         <file
@@ -41,5 +39,10 @@
             preprocess="xml-stripblanks"
             alias="dialog-error-symbolic.svg"
             >icons/dialog-error-symbolic.svg</file>
+    </gresource>
+    <!-- Kleinia bento card icons: a standard hicolor subdir so GtkIconTheme finds them -->
+    <gresource prefix="/com/fyralabs/Readymade/icons/scalable/actions/">
+        <file preprocess="xml-stripblanks" alias="kleinia-docs-symbolic.svg">icons/kleinia-docs-symbolic.svg</file>
+        <file preprocess="xml-stripblanks" alias="kleinia-community-symbolic.svg">icons/kleinia-community-symbolic.svg</file>
     </gresource>
 </gresources>

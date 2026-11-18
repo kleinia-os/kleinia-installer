@@ -20,18 +20,13 @@
 }
 
 .installation-bento-card.welcome-card {
-    background-image: url("viewports-light.webp");
+    background-image: url("kleinia-welcome-light.webp");
 }
 
 .installation-bento-card.help-card {
-    background-image: url("umbrella-light.webp");
+    background-image: url("kleinia-docs-light.webp");
 }
 
 .installation-bento-card.contribute-card {
-    background-position: bottom;
-    background-image: url("blueprint.webp");
-}
-
-.installation-bento-card.sponsor-card {
-    background-image: url("foresty-skies-light.webp");
+    background-image: url("kleinia-community-light.webp");
 }

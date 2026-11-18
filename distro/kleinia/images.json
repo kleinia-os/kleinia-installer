@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Kleinia 0.1 (Aloe)",
+    "id": "kleinia",
+    "variants": [
+      {
+        "id": "kleinia",
+        "image": "ghcr.io/kleinia-os/kleinia:testing",
+        "preview": false
+      }
+    ]
+  }
+]
