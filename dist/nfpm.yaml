@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# kleinia-installer RPM: the installer binary + the bundled libhelium
-# runtime. Distro-facing config (readymade.toml, repart-cfgs, desktop
-# entries) lives in the kleinia assembly repo's files tree — single source
-# of truth for distro config.
+# kleinia-installer RPM: the installer binary, its app icon and the bundled
+# libhelium runtime. Distro-facing config (readymade.toml, repart-cfgs,
+# desktop entries) lives in the kleinia assembly repo's files tree — single
+# source of truth for distro config.
 name: kleinia-installer
 arch: x86_64
 platform: linux
@@ -29,3 +29,5 @@ contents:
       mode: 0755
   - src: data/com.fyralabs.pkexec.readymade.policy
     dst: /usr/share/polkit-1/actions/com.fyralabs.pkexec.readymade.policy
+  - src: data/io.kleinia.Installer.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/io.kleinia.Installer.svg
